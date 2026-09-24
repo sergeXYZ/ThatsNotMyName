@@ -1,0 +1,13 @@
+---
+description: Git-first workflow — commits only on request, no secrets
+alwaysApply: true
+---
+
+# Git versioning
+
+- Relevant work belongs in Git; no parallel shadow copies of project results.
+- **Commits / push / PRs only when the user explicitly asks.**
+- Before commit: `git status`, `git diff`, `git log -5` in parallel; message via HEREDOC; focus on why.
+- Never commit secrets (`.env`, keys, credentials).
+- Do not change `git config`. No force-push to main/master, no hard reset, no `--no-verify` unless explicitly requested.
+- Amend only when the user asked or a hook auto-fixed files, HEAD is yours, and not yet pushed.
