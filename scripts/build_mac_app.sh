@@ -34,12 +34,42 @@ for size in 16 32 128 256 512; do
 done
 iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 
-"$PY" -m venv "$APP/Contents/Resources/python"
-APP_PY="$APP/Contents/Resources/python/bin/python3"
-"$APP_PY" -m pip install -q -r requirements.txt 'pywebview==5.4'
-# pywebview 5.4 on Python 3.9 pulls a WebKit backend via pyobjc.
+# A venv only links to the Python on this Mac. Ship a real interpreter for both
+# architectures so the app starts on machines that have no Python installed.
+PBS_TAG="20260924"
+PBS_VER="3.12.14"
+fetch_python() {
+  local triple="$1"
+  local dest="$2"
+  local name="cpython-${PBS_VER}+${PBS_TAG}-${triple}-install_only.tar.gz"
+  local tar="build/python-standalone/${name}"
+  local url="https://github.com/astral-sh/python-build-standalone/releases/download/${PBS_TAG}/${name}"
+  mkdir -p build/python-standalone
+  if [[ ! -f "$tar" ]]; then
+    curl -fL --retry 3 -o "$tar.partial" "$url"
+    mv "$tar.partial" "$tar"
+  fi
+  local tmp
+  tmp="$(mktemp -d)"
+  tar -xzf "$tar" -C "$tmp"
+  rm -rf "$dest"
+  mv "$tmp/python" "$dest"
+  rm -rf "$tmp"
+}
 
-clang -O2 -o "$APP/Contents/MacOS/That's Not My Name" macos/launcher.c
+install_deps() {
+  local py="$1"
+  shift
+  "$@" "$py" -m pip install -q --upgrade pip
+  "$@" "$py" -m pip install -q -r requirements.txt 'pywebview==5.4'
+}
+
+fetch_python "aarch64-apple-darwin" "$APP/Contents/Resources/python-arm64"
+fetch_python "x86_64-apple-darwin" "$APP/Contents/Resources/python-x86_64"
+install_deps "$APP/Contents/Resources/python-arm64/bin/python3"
+install_deps "$APP/Contents/Resources/python-x86_64/bin/python3" arch -x86_64
+
+clang -arch arm64 -arch x86_64 -O2 -o "$APP/Contents/MacOS/That's Not My Name" macos/launcher.c
 chmod +x "$APP/Contents/MacOS/That's Not My Name"
 codesign --force --deep --sign - "$APP"
 

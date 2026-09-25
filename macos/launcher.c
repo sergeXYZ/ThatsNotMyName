@@ -23,8 +23,16 @@ int main(void) {
     dirbuf[sizeof(dirbuf) - 1] = '\0';
     char *macos = dirname(dirbuf);
 
+#if defined(__aarch64__)
+#define PY_DIR "python-arm64"
+#elif defined(__x86_64__)
+#define PY_DIR "python-x86_64"
+#else
+#error That's Not My Name supports Apple Silicon and Intel only
+#endif
+
     snprintf(appdir, sizeof(appdir), "%s/../Resources/app", macos);
-    snprintf(python, sizeof(python), "%s/../Resources/python/bin/python3", macos);
+    snprintf(python, sizeof(python), "%s/../Resources/" PY_DIR "/bin/python3", macos);
     snprintf(script, sizeof(script), "%s/macos/desktop.py", appdir);
 
     if (chdir(appdir) != 0) {
@@ -35,6 +43,7 @@ int main(void) {
     unsetenv("PYTHONPATH");
     unsetenv("PYTHONSTARTUP");
     setenv("PYTHONUNBUFFERED", "1", 1);
+    setenv("PYTHONNOUSERSITE", "1", 1);
     setenv("TNMN_APP", "1", 1);
 
     execl(python, python, script, (char *)NULL);
