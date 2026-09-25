@@ -24,15 +24,18 @@ jobs:
           choco install innosetup --no-progress -y
 
       - name: Icon and WebView2 bootstrapper
+        shell: powershell
         run: |
           python scripts/build_icon.py
-          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "build\MicrosoftEdgeWebview2Setup.exe"
+          Invoke-WebRequest -UseBasicParsing -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "build\MicrosoftEdgeWebview2Setup.exe"
 
       - name: Bundle the app
         run: pyinstaller --noconfirm --clean scripts/thatsnotmyname.spec
 
       - name: Build the setup
-        run: "& '${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe' scripts\windows-installer.iss"
+        shell: powershell
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" scripts\windows-installer.iss
 
       - name: Publish the setup
         uses: softprops/action-gh-release@v2

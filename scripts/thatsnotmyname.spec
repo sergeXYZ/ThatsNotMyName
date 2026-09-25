@@ -1,7 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
 """Windows bundle. Run from the repo root: pyinstaller scripts/thatsnotmyname.spec"""
 
+from pathlib import Path
+
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
+ROOT = Path(SPECPATH).resolve().parent
 
 hidden = ["web_ui", "mtx_job", "set_mtx_input_names", "tkinter", "tkinter.filedialog"]
 for package in ("webview", "openpyxl", "numbers_parser", "flask", "jinja2", "werkzeug", "clr"):
@@ -11,17 +15,20 @@ for package in ("webview", "openpyxl", "numbers_parser", "flask", "jinja2", "wer
         hidden.append(package)
 
 datas = [
-    ("assets/logo-header.png", "assets"),
-    ("assets/bg-rays.png", "assets"),
-    ("assets/warning-dd.png", "assets"),
-    ("assets/thats-not-my-name-bg.png", "assets"),
+    (str(ROOT / "assets" / name), "assets")
+    for name in (
+        "logo-header.png",
+        "bg-rays.png",
+        "warning-dd.png",
+        "thats-not-my-name-bg.png",
+    )
 ]
 datas += collect_data_files("numbers_parser")
 datas += collect_data_files("openpyxl")
 
 a = Analysis(
-    ["macos/desktop.py"],
-    pathex=["."],
+    [str(ROOT / "macos" / "desktop.py")],
+    pathex=[str(ROOT)],
     binaries=[],
     datas=datas,
     hiddenimports=hidden,
@@ -43,7 +50,7 @@ exe = EXE(
     strip=False,
     upx=False,
     console=False,
-    icon="build/app-icon.ico",
+    icon=str(ROOT / "build" / "app-icon.ico"),
 )
 coll = COLLECT(
     exe,

@@ -10,20 +10,20 @@ AppVersion={#AppVersion}
 AppPublisher=That's Not My Name
 DefaultDirName={autopf}\ThatsNotMyName
 DefaultGroupName=That's Not My Name
-OutputDir=dist
+OutputDir=..\dist
 OutputBaseFilename=ThatsNotMyName-Setup
-SetupIconFile=build\app-icon.ico
 UninstallDisplayIcon={app}\ThatsNotMyName.exe
 Compression=lzma2
 SolidCompression=yes
-ArchitecturesAllowed=x64compatible
-ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=lowest
 WizardStyle=modern
+SetupIconFile=..\build\app-icon.ico
 
 [Files]
-Source: "dist\ThatsNotMyName\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "build\MicrosoftEdgeWebview2Setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
+Source: "..\dist\ThatsNotMyName\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\build\MicrosoftEdgeWebview2Setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 [Icons]
 Name: "{group}\That's Not My Name"; Filename: "{app}\ThatsNotMyName.exe"

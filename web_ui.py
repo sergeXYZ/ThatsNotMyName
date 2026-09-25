@@ -29,14 +29,21 @@ from werkzeug.utils import secure_filename
 
 from mtx_job import inspect_cc, inspect_sheet, run_apply
 
-ROOT = Path(__file__).resolve().parent
+if getattr(sys, "frozen", False):
+    ROOT = Path(getattr(sys, "_MEIPASS"))
+else:
+    ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "assets"
 HOST = "127.0.0.1"
 PORT = 8765
 APP_NAME = "That's Not My Name"
-SUPPORT = Path.home() / "Library/Application Support/That's Not My Name"
+if sys.platform == "win32":
+    SUPPORT = Path(os.environ.get("APPDATA", Path.home())) / APP_NAME
+    LOG_PATH = SUPPORT / f"{APP_NAME}.log"
+else:
+    SUPPORT = Path.home() / "Library/Application Support" / APP_NAME
+    LOG_PATH = Path.home() / "Library/Logs" / f"{APP_NAME}.log"
 UPLOADS = SUPPORT / "uploads"
-LOG_PATH = Path.home() / "Library/Logs/That's Not My Name.log"
 
 KINDS = {
     "sheet": {".csv", ".xlsx", ".xlsm", ".numbers"},
@@ -110,7 +117,10 @@ def reveal_in_finder(report: str) -> None:
             continue
         if not path.is_file():
             continue
-        subprocess.Popen(["open", "-R", str(path)])
+        if sys.platform == "win32":
+            subprocess.Popen(["explorer", f"/select,{path}"])
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", "-R", str(path)])
         return
 
 
@@ -728,6 +738,25 @@ _SCOPES: list = []
 
 
 def windows_choose(directory: bool, prompt: str, extensions: list[str]) -> str:
+    try:
+        import webview
+    except Exception:
+        webview = None
+
+    if webview is not None and webview.windows:
+        window = webview.windows[0]
+        if directory:
+            chosen = window.create_file_dialog(webview.FOLDER_DIALOG)
+        else:
+            pattern = ";".join(f"*.{ext}" for ext in extensions) if extensions else "*.*"
+            chosen = window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                file_types=(f"{prompt} ({pattern})", "All files (*.*)"),
+            )
+        if not chosen:
+            return ""
+        return str(chosen[0] if isinstance(chosen, (list, tuple)) else chosen)
+
     import tkinter as tk
     from tkinter import filedialog
 
