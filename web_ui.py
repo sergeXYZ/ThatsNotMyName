@@ -213,9 +213,12 @@ input[type=text] {
 }
 input[type=text]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,47,146,.22); }
 input[type=file] { display: none; }
-.check { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; font-weight: 600; cursor: pointer; }
+.check {
+  position: relative;
+  display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; font-weight: 600; cursor: pointer;
+}
 .check input {
-  position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0;
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer;
 }
 .check .tick {
   width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
@@ -353,7 +356,18 @@ const $ = id => document.getElementById(id);
 const FIELD = { sheet: 'sheet', r1: 'r1', cc: 'cc' };
 
 const DESKTOP = __DESKTOP__;
-addEventListener('scroll', () => { if (scrollY || scrollX) scrollTo(0, 0); }, { passive: true });
+function pinPage() {
+  if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+}
+addEventListener('scroll', pinPage, { passive: true });
+addEventListener('focusin', () => requestAnimationFrame(pinPage));
+if (window.visualViewport) {
+  visualViewport.addEventListener('scroll', pinPage);
+  visualViewport.addEventListener('resize', pinPage);
+}
+document.querySelectorAll('.check').forEach(label => {
+  label.addEventListener('mousedown', event => event.preventDefault());
+});
 
 function say(text, bad) {
   const el = $('status');
