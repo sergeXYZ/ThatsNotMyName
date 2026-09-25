@@ -169,13 +169,15 @@ HTML = r"""<!DOCTYPE html>
 }
 * { box-sizing: border-box; }
 html, body {
-  margin: 0; height: 100%;
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  margin: 0; overflow: hidden;
   color: var(--text);
   font-family: var(--font);
   font-size: 14px;
   background: #1f8fe0;
 }
-body { display: flex; flex-direction: column; overflow: hidden; }
+body { display: flex; flex-direction: column; }
 .hero {
   flex: 0 0 auto;
   line-height: 0;
@@ -183,7 +185,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 }
 .hero img { width: 100%; height: auto; display: block; }
 .scroll {
-  flex: 1; min-height: 0; overflow-y: auto;
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  overscroll-behavior: contain;
   background: #1f8fe0 url("/assets/bg-rays.png") top center / 100% auto no-repeat;
 }
 main { max-width: 520px; margin: 0 auto; padding: 12px 14px 40px; }
@@ -350,6 +353,7 @@ const $ = id => document.getElementById(id);
 const FIELD = { sheet: 'sheet', r1: 'r1', cc: 'cc' };
 
 const DESKTOP = __DESKTOP__;
+addEventListener('scroll', () => { if (scrollY || scrollX) scrollTo(0, 0); }, { passive: true });
 
 function say(text, bad) {
   const el = $('status');
@@ -737,6 +741,36 @@ def friendly_access_error(message: str) -> str:
 _SCOPES: list = []
 
 
+def _windows_filters(extensions: list[str]) -> tuple[str, ...]:
+    """pywebview only accepts 'Words (*.ext;*.ext)' — extra parentheses cancel the dialog."""
+    pattern = ";".join(f"*.{ext}" for ext in extensions) if extensions else "*.*"
+    return (f"Files ({pattern})", "All files (*.*)")
+
+
+def _on_windows_ui(window, action):
+    """WinForms file dialogs only open on the window thread. A Flask thread is ignored."""
+    from webview.platforms import winforms
+
+    form = winforms.BrowserView.instances.get(window.uid)
+    if form is None or not form.InvokeRequired:
+        return action()
+    box: dict = {}
+
+    def run():
+        try:
+            box["value"] = action()
+        except Exception as exc:
+            box["error"] = exc
+        return None
+
+    from System import Func, Type
+
+    form.Invoke(Func[Type](run))
+    if "error" in box:
+        raise box["error"]
+    return box.get("value")
+
+
 def windows_choose(directory: bool, prompt: str, extensions: list[str]) -> str:
     try:
         import webview
@@ -745,14 +779,13 @@ def windows_choose(directory: bool, prompt: str, extensions: list[str]) -> str:
 
     if webview is not None and webview.windows:
         window = webview.windows[0]
-        if directory:
-            chosen = window.create_file_dialog(webview.FOLDER_DIALOG)
-        else:
-            pattern = ";".join(f"*.{ext}" for ext in extensions) if extensions else "*.*"
-            chosen = window.create_file_dialog(
-                webview.OPEN_DIALOG,
-                file_types=(f"{prompt} ({pattern})", "All files (*.*)"),
-            )
+
+        def show():
+            kind = webview.FOLDER_DIALOG if directory else webview.OPEN_DIALOG
+            filters = () if directory else _windows_filters(extensions)
+            return window.create_file_dialog(kind, directory="", file_types=filters)
+
+        chosen = _on_windows_ui(window, show)
         if not chosen:
             return ""
         return str(chosen[0] if isinstance(chosen, (list, tuple)) else chosen)

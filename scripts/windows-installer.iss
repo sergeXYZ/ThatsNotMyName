@@ -1,7 +1,7 @@
 ; Inno Setup script. Build on Windows after PyInstaller:
 ;   ISCC.exe scripts\windows-installer.iss
 
-#define AppVersion "1.0.2"
+#define AppVersion "1.0.3"
 
 [Setup]
 AppId={{A7B3E1C4-6D28-4F0A-9C55-1E2D8B7A4F10}
