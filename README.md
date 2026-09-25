@@ -30,6 +30,8 @@ Create.Control (`.dbcc`) matches objects by the patching number. `--replace-exis
 
 ## Notes
 
+**On macOS, a download from the browser is blocked with “Apple could not verify”. The app has no Apple Developer certificate. Open it once, then choose System Settings → Privacy & Security → Open Anyway. On Windows, SmartScreen shows a similar warning; choose Run anyway.**
+
 Cell fills in Excel (`.xlsx`) and Numbers (`.numbers`) are mapped to the nearest Create.Control color, and in a `.dbpr` to the nearest R1 sound-object color on the positioning controls.
 
 The fill can sit on **Input Name** or **Input Number**. Either column is enough. When the two cells in a row have different colors, the **Input Name** color is used. A cell with no fill does not block the color from the other column. Rows where neither cell has a fill are left unchanged.
