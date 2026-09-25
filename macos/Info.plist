@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>That's Not My Name</string>
+	<key>CFBundleIdentifier</key>
+	<string>de.thatsnotmyname.app</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>That's Not My Name</string>
+	<key>CFBundleDisplayName</key>
+	<string>That's Not My Name</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>That's Not My Name uses the macOS file dialog to choose spreadsheets and project files.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>That's Not My Name reads and writes the copies you ask for on the Desktop.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>That's Not My Name reads spreadsheets and project files from Documents.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>That's Not My Name reads and writes project files in Downloads.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>

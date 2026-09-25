@@ -1,0 +1,41 @@
+name: Windows installer
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pywebview==5.4 pyinstaller pillow
+          choco install innosetup --no-progress -y
+
+      - name: Icon and WebView2 bootstrapper
+        run: |
+          python scripts/build_icon.py
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "build\MicrosoftEdgeWebview2Setup.exe"
+
+      - name: Bundle the app
+        run: pyinstaller --noconfirm --clean scripts/thatsnotmyname.spec
+
+      - name: Build the setup
+        run: "& '${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe' scripts\windows-installer.iss"
+
+      - name: Publish the setup
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ThatsNotMyName-Setup.exe
+          generate_release_notes: true

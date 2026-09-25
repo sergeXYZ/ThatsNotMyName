@@ -23,3 +23,15 @@ __pycache__/
 *.pyc
 .coverage
 .pytest_cache/
+
+# Generated show files (may contain a project password hash)
+out/
+
+# Personal spreadsheets and show files — do not publish
+*.xlsx
+*.xlsm
+*.xls
+*.numbers
+*.csv
+*.dbcc
+*.dbpr
